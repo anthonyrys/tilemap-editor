@@ -17,6 +17,8 @@
       }
     },
     "name": "example-tilemap",
+    "offset": [0, 0],
+    "strata_alpha": true,
     "tile": {
       "dimensions": [
         64,
