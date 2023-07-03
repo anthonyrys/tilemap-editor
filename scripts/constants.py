@@ -1,0 +1,6 @@
+TITLE = 'tilemap editor'
+FRAME_RATE = 30
+
+SCREEN_DIMENSIONS = (1400, 800)
+
+SCREEN_COLOR = (7, 7, 7)

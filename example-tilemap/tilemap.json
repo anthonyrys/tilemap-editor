@@ -1,0 +1,34 @@
+{
+  "config": {
+    "images": {
+      "1a": {
+        "path": "imgs\\img-a.png",
+        "tiles": "tile_a"
+      },
+      "1b": {
+        "path": "imgs\\img-b.png",
+        "tiles": [
+          "tile_a",
+          "ramp_b",
+          "ramp_right",
+          "ramp_left",
+          "ramp_right"
+        ]
+      }
+    },
+    "name": "example-tilemap",
+    "tile": {
+      "dimensions": [
+        64,
+        64
+      ]
+    },
+    "tilemap": {
+      "dimensions": [
+        100,
+        100
+      ]
+    }
+  },
+  "tiles": []
+}
