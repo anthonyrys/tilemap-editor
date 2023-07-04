@@ -350,6 +350,15 @@ class TilemapEditor:
         screen.blit(strata_surface, (325, 715))
         screen.blit(orientation_surface, (325, 680))
 
+        if self.interface_tile:
+            tileset_tile = self.tilemap['config']['images'][self.interface_tile['tileset']]['tiles']
+            if isinstance(tileset_tile, list):
+                tileset_tile = tileset_tile[self.interface_tile['index']]
+            tileset_tile = tileset_tile.replace('_', ' ')
+
+            tile_surface = utils.create_text(f'tile: {tileset_tile}')
+            screen.blit(tile_surface, (325, 645))
+
     def update(self):
         if not self.tilemap:
             pygame.display.set_caption(f'{TITLE} | fps: {round(clock.get_fps())}')
@@ -417,6 +426,8 @@ if __name__ == '__main__':
 
     screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
     clock = pygame.time.Clock()
+
+    utils.Fonts.init()
 
     tilemap_editor = TilemapEditor(screen, clock)
 

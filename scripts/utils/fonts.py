@@ -31,7 +31,7 @@ class Fonts:
         }
     }
     
-    def get(font):
+    def init():
         for font_file in os.listdir(Fonts.FONT_PATH):
             name = font_file.split('.')[0]
             imgs = load_spritesheet(os.path.join(Fonts.FONT_PATH, font_file))
@@ -39,11 +39,9 @@ class Fonts:
             for index, key in enumerate(Fonts.FONT_KEYS):
                 Fonts.fonts[name]['letters'][key] = imgs[index]
 
-        return Fonts.fonts[font]
-
 def create_text(text, color=(255, 255, 255), size=.5):
     text = text.lower()
-    font = Fonts.get('default')
+    font = Fonts.fonts['default']
     
     surf_size = [0, 0]
     imgs = []
