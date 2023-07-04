@@ -297,6 +297,8 @@ class TilemapEditor:
                 print(e)
                 continue
 
+        pygame.display.set_caption(f'{self.tilemap["config"]["name"]}')
+
     def update_tilemap_surface(self):
         tilemap_surface = self.components['tilemap']
         tilemap_surface['surface'].fill(tilemap_surface['color'])
@@ -317,18 +319,33 @@ class TilemapEditor:
         self.display_data['position_free'] = mouse_position
         self.display_data['position_grid'] = position
 
+        display_rect = pygame.Rect(
+            -self.display_data['current_offset'][0],
+            -self.display_data['current_offset'][1],
+            *SCREEN_DIMENSIONS
+        )
+
         if self.display_data['strata_alpha']:
             for tile in sorted([t for t in self.components['tiles'] if t['strata'] != self.display_data['strata']], key = lambda t: t['strata']):
+                if not display_rect.colliderect(tile['rect']):
+                    continue
+
                 surf = tile['surface'].copy()
                 surf.set_alpha(100)
 
                 tilemap_surface['surface'].blit(surf, tile['rect'])
 
             for tile in [t for t in self.components['tiles'] if t['strata'] == self.display_data['strata']]:
+                if not display_rect.colliderect(tile['rect']):
+                    continue
+
                 tilemap_surface['surface'].blit(tile['surface'], tile['rect'])
 
         else:
             for tile in sorted(self.components['tiles'], key = lambda t: t['strata']):
+                if not display_rect.colliderect(tile['rect']):
+                    continue
+                
                 tilemap_surface['surface'].blit(tile['surface'], tile['rect'])
 
         if self.interface_tile:
@@ -360,11 +377,6 @@ class TilemapEditor:
             screen.blit(tile_surface, (325, 645))
 
     def update(self):
-        if not self.tilemap:
-            pygame.display.set_caption(f'{TITLE} | fps: {round(clock.get_fps())}')
-        else:
-            pygame.display.set_caption(f'{self.tilemap["config"]["name"]} | fps: {round(clock.get_fps())}')
-
         quit = self.register_pygame_events()
         self.register_mouse_events()
 
@@ -402,6 +414,9 @@ class TilemapEditor:
 
         screen.blit(self.components['sidebar']['surface'], self.components['sidebar']['rect'])
 
+        fps_surface = utils.create_text(str(round(clock.get_fps())))
+        screen.blit(fps_surface, fps_surface.get_rect(topright=[SCREEN_DIMENSIONS[0] - 5, 5]))
+
         return quit
 
 if __name__ == '__main__':
@@ -426,6 +441,8 @@ if __name__ == '__main__':
 
     screen = pygame.display.set_mode(SCREEN_DIMENSIONS)
     clock = pygame.time.Clock()
+
+    pygame.display.set_caption(f'{TITLE}')
 
     utils.Fonts.init()
 
