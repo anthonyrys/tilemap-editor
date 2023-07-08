@@ -179,6 +179,9 @@ class TilemapEditor:
     def save_tilemap(self):
         self.interface_tile = None
 
+        if not self.tilemap:
+            return
+        
         self.tilemap['config']['offset'] = self.display_data['current_offset']
         self.tilemap['config']['strata_alpha'] = self.display_data['strata_alpha']
 
@@ -250,8 +253,8 @@ class TilemapEditor:
                     tile = tile[i]
                 
                 position = [
-                    padding[0] + ((padding[0] + surface.get_width()) * x),
-                    padding[1] + ((padding[1] + surface.get_height()) * y),
+                    padding[0] + ((padding[0] + self.tilemap['config']['tile']['dimensions'][0]) * x),
+                    padding[1] + ((padding[1] + self.tilemap['config']['tile']['dimensions'][1]) * y),
                 ]
 
                 prefab = prefabs.tile_interface(position, surface, 0, image, i, tile, 1)
