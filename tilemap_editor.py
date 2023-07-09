@@ -25,6 +25,8 @@ class TilemapEditor:
             'interface_images': {},
             'position': [],
 
+            'grid_placing': True,
+
             'offset': [0, 0],
             'current_offset': [0, 0],
 
@@ -33,6 +35,10 @@ class TilemapEditor:
 
             'strata_alpha': False
         }
+
+        self.components_copy = self.components.copy()
+        self.mouse_copy = self.mouse.copy()
+        self.display_data_copy = self.display_data.copy()
 
         self.interface_tile = None
 
@@ -64,6 +70,9 @@ class TilemapEditor:
 
                 elif event.key in utils.Keybinds.KEYBINDS['toggle_strata_alpha']:
                     self.display_data['strata_alpha'] = not self.display_data['strata_alpha']
+
+                elif event.key in utils.Keybinds.KEYBINDS['toggle_placing']:
+                    self.display_data['grid_placing'] = not self.display_data['grid_placing']
 
                 if event.key == pygame.K_s and event.mod & pygame.KMOD_CTRL:
                     if self.tilemap:
@@ -123,7 +132,7 @@ class TilemapEditor:
             interface_tile = self.interface_tile
 
             tile = prefabs.tile_tilemap(
-                self.display_data['position_grid'],
+                self.display_data['position'],
                 interface_tile['surface'],
                 self.display_data['orientation'],
                 interface_tile['tileset'],
@@ -146,7 +155,7 @@ class TilemapEditor:
                 return
 
             for tile in [t for t in self.components['tiles'] 
-                            if t['rect'].collidepoint(self.display_data['position_grid'])
+                            if t['rect'].collidepoint(self.display_data['position'])
                             and t['strata'] == self.display_data['strata']]:
                 self.components['tiles'].remove(tile)
 
@@ -184,6 +193,7 @@ class TilemapEditor:
         
         self.tilemap['config']['offset'] = self.display_data['current_offset']
         self.tilemap['config']['strata_alpha'] = self.display_data['strata_alpha']
+        self.tilemap['config']['grid_placing'] = self.display_data['grid_placing']
 
         self.tilemap['tiles'] = []
         for tile in self.components['tiles']:
@@ -207,31 +217,9 @@ class TilemapEditor:
         if self.tilemap:
             self.save_tilemap()
             
-        self.components = {
-            'sidebar': prefabs.sidebar(),
-            'tilemap': None,
-            'tiles': []
-        }
-
-        self.mouse = {
-            'hovers': [],
-
-            'press': False,
-            'press_position': [[0, 0], [0, 0]]
-        }
-
-        self.display_data = {
-            'interface_images': {},
-            'position': [],
-
-            'offset': [0, 0],
-            'current_offset': [0, 0],
-
-            'strata': 0,
-            'orientation': 0,
-
-            'strata_alpha': False
-        }
+        self.components = self.components_copy.copy()
+        self.mouse = self.mouse_copy.copy()
+        self.display_data = self.display_data_copy.copy()
 
         self.interface_tile = None
 
@@ -275,6 +263,7 @@ class TilemapEditor:
         self.display_data['offset'] = self.tilemap['config']['offset']
 
         self.display_data['strata_alpha'] = self.tilemap['config']['strata_alpha']
+        self.display_data['grid_placing'] = self.tilemap['config']['grid_placing']
 
         self.components['tilemap'] = prefabs.tilemap_surface(dimensions)
 
@@ -319,8 +308,10 @@ class TilemapEditor:
             (tile_dimensions[1] * round(mouse_position[1] / tile_dimensions[1])),
         ]
 
-        self.display_data['position_free'] = mouse_position
-        self.display_data['position_grid'] = position
+        if self.display_data['grid_placing']:
+            self.display_data['position'] = position
+        else:
+            self.display_data['position'] = mouse_position
 
         display_rect = pygame.Rect(
             -self.display_data['current_offset'][0],
@@ -355,14 +346,18 @@ class TilemapEditor:
             surf = self.interface_tile['surface'].copy()
             surf = pygame.transform.rotate(surf, -self.display_data['orientation'])
 
-            tilemap_surface['surface'].blit(surf, self.display_data['position_grid'])
+            tilemap_surface['surface'].blit(surf, self.display_data['position'])
 
         screen.blit(tilemap_surface['surface'], 
                 [tilemap_surface['rect'][0] + self.display_data['current_offset'][0], 
                 tilemap_surface['rect'][1] + self.display_data['current_offset'][1]])
 
-        x, y = self.display_data['position_grid']
-        position_surface = utils.create_text(f'position: {x}, {y}')
+        x, y = self.display_data['position']
+        if self.display_data['grid_placing']:
+            position_surface = utils.create_text(f'position (grid): {x}, {y}')
+        else:
+            position_surface = utils.create_text(f'position (free): {x}, {y}')
+
         strata_surface = utils.create_text(f'strata: {self.display_data["strata"]}')
         orientation_surface = utils.create_text(f'orientation: {self.display_data["orientation"]}')
 

@@ -19,6 +19,7 @@
     "name": "example-tilemap",
     "offset": [0, 0],
     "strata_alpha": true,
+    "grid_placing": true,
     "tile": {
       "dimensions": [
         64,
