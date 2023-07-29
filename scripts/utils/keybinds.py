@@ -10,5 +10,9 @@ class Keybinds:
         'toggle_strata_alpha': [pygame.K_y],
 
         'strata_up': [pygame.K_e],
-        'strata_down': [pygame.K_q]
+        'strata_down': [pygame.K_q],
+
+        'select_section': [pygame.K_f],
+        'select_move_x': [pygame.K_z],
+        'select_move_y': [pygame.K_x]
     }

@@ -42,6 +42,11 @@ class TilemapEditor:
 
         self.interface_tile = None
 
+        self.selecting = False
+        self.selected_tiles = []
+        self.selecting_pos = [0, 0]
+        self.selecting_rect = None
+
     def register_pygame_events(self):
         quit = False
         for event in pygame.event.get():
@@ -52,6 +57,7 @@ class TilemapEditor:
             elif event.type == pygame.KEYDOWN:
                 if event.key in utils.Keybinds.KEYBINDS['clear_selected']:
                     self.interface_tile = None
+                    self.selected_tiles = []
                 
                 elif event.key in utils.Keybinds.KEYBINDS['rotate']:
                     self.display_data['orientation'] += 90
@@ -74,6 +80,48 @@ class TilemapEditor:
                 elif event.key in utils.Keybinds.KEYBINDS['toggle_placing']:
                     self.display_data['grid_placing'] = not self.display_data['grid_placing']
 
+                elif event.key in utils.Keybinds.KEYBINDS['select_section']:
+                    if self.components['tilemap']:
+                        tilemap_surface = self.components['tilemap']
+                        offset = self.display_data['current_offset']
+
+                        mouse_position = [*pygame.mouse.get_pos()]
+                        mouse_position[0] -= tilemap_surface['rect'].x + offset[0]
+                        mouse_position[1] -= tilemap_surface['rect'].y + offset[1]
+                        
+                        self.selecting = True
+                        self.selecting_pos = mouse_position
+
+                elif event.key in utils.Keybinds.KEYBINDS['select_move_x']:
+                    if self.tilemap:
+                        per_pos = self.tilemap['config']['tile']['dimensions'][0]
+                        if event.mod & pygame.KMOD_SHIFT:
+                            per_pos = -per_pos
+
+                        for tile in self.selected_tiles:
+                            if tile['rect'].x + per_pos < 0:
+                                continue
+
+                            if tile['rect'].x + per_pos > self.components['tilemap']['surface'].get_width():
+                                continue
+
+                            self.components['tiles'][self.components['tiles'].index(tile)]['rect'].x += per_pos 
+
+                elif event.key in utils.Keybinds.KEYBINDS['select_move_y']:
+                    if self.tilemap:
+                        per_pos = self.tilemap['config']['tile']['dimensions'][1]
+                        if event.mod & pygame.KMOD_SHIFT:
+                            per_pos = -per_pos
+
+                        for tile in self.selected_tiles:
+                            if tile['rect'].y + per_pos < 0:
+                                continue
+
+                            if tile['rect'].y + per_pos > self.components['tilemap']['surface'].get_height():
+                                continue
+
+                            self.components['tiles'][self.components['tiles'].index(tile)]['rect'].y += per_pos
+
                 if event.key == pygame.K_s and event.mod & pygame.KMOD_CTRL:
                     if self.tilemap:
                         self.save_tilemap()
@@ -81,6 +129,15 @@ class TilemapEditor:
                 elif event.key == pygame.K_l and event.mod & pygame.KMOD_CTRL:
                     self.load_tilemap(filedialog.askdirectory())
 
+            elif event.type == pygame.KEYUP:
+                if event.key in utils.Keybinds.KEYBINDS['select_section']:
+                    self.selecting = False
+                    self.selected_tiles = []
+
+                    for tile in self.components['tiles']:
+                        if tile['rect'].colliderect(self.selecting_rect) and self.display_data['strata'] == tile['strata']:
+                            self.selected_tiles.append(tile)
+                    
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.on_mouse_down(event)
 
@@ -318,6 +375,32 @@ class TilemapEditor:
             -self.display_data['current_offset'][1],
             *SCREEN_DIMENSIONS
         )
+
+        if self.selecting:
+            position = [0, 0]
+            size = [
+                abs(self.display_data['position'][0] - self.selecting_pos[0]),
+                abs(self.display_data['position'][1] - self.selecting_pos[1])
+            ]
+
+            if self.display_data['position'][0] <= self.selecting_pos[0]:
+                position[0] = self.display_data['position'][0]
+            else:
+                position[0] = self.selecting_pos[0]
+
+            if self.display_data['position'][1] <= self.selecting_pos[1]:
+                position[1] = self.display_data['position'][1]
+            else:
+                position[1] = self.selecting_pos[1]
+
+            self.selecting_rect = pygame.Rect(*position, *size)
+            pygame.draw.rect(tilemap_surface['surface'], (255, 0, 0), self.selecting_rect)
+
+        for tile in self.selected_tiles:
+            outline = pygame.Surface((tile['rect'].width * 1.1, tile['rect'].height * 1.1))
+            outline.fill((255, 0, 0))
+
+            tilemap_surface['surface'].blit(outline, outline.get_rect(center=tile['rect'].center))
 
         if self.display_data['strata_alpha']:
             for tile in sorted([t for t in self.components['tiles'] if t['strata'] != self.display_data['strata']], key = lambda t: t['strata']):
