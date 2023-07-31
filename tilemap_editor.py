@@ -402,27 +402,20 @@ class TilemapEditor:
 
             tilemap_surface['surface'].blit(outline, outline.get_rect(center=tile['rect'].center))
 
-        if self.display_data['strata_alpha']:
-            for tile in sorted([t for t in self.components['tiles'] if t['strata'] != self.display_data['strata']], key = lambda t: t['strata']):
-                if not display_rect.colliderect(tile['rect']):
-                    continue
+        drawable_tiles = [t for t in self.components['tiles'] if display_rect.colliderect(t['rect'])]
 
+        if self.display_data['strata_alpha']:
+            for tile in sorted([t for t in drawable_tiles if t['strata'] != self.display_data['strata']], key = lambda t: t['strata']):
                 surf = tile['surface'].copy()
                 surf.set_alpha(100)
 
                 tilemap_surface['surface'].blit(surf, tile['rect'])
 
-            for tile in [t for t in self.components['tiles'] if t['strata'] == self.display_data['strata']]:
-                if not display_rect.colliderect(tile['rect']):
-                    continue
-
+            for tile in [t for t in drawable_tiles if t['strata'] == self.display_data['strata']]:
                 tilemap_surface['surface'].blit(tile['surface'], tile['rect'])
 
         else:
-            for tile in sorted(self.components['tiles'], key = lambda t: t['strata']):
-                if not display_rect.colliderect(tile['rect']):
-                    continue
-                
+            for tile in sorted(drawable_tiles, key = lambda t: t['strata']):
                 tilemap_surface['surface'].blit(tile['surface'], tile['rect'])
 
         if self.interface_tile:
