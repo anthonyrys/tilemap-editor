@@ -1,5 +1,7 @@
 {
   "config": {
+    "flipped": false,
+    "grid_placing": true,
     "images": {
       "1a": {
         "path": "imgs\\img-a.png",
@@ -11,15 +13,15 @@
           "tile_a",
           "ramp_b",
           "ramp_right",
-          "ramp_left",
-          "ramp_right"
+          "ramp_left"
         ]
       }
     },
     "name": "example-tilemap",
     "offset": [0, 0],
+    "orientation": 150,
+    "strata": 1,
     "strata_alpha": true,
-    "grid_placing": true,
     "tile": {
       "dimensions": [
         64,

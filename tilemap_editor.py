@@ -32,6 +32,7 @@ class TilemapEditor:
 
             'strata': 0,
             'orientation': 0,
+            'flipped': False,
 
             'strata_alpha': False
         }
@@ -63,6 +64,9 @@ class TilemapEditor:
                     self.display_data['orientation'] += 90
                     if self.display_data['orientation'] == 360:
                         self.display_data['orientation'] = 0
+
+                elif event.key in utils.Keybinds.KEYBINDS['flip']:
+                    self.display_data['flipped'] = not self.display_data['flipped'] 
 
                 elif event.key in utils.Keybinds.KEYBINDS['strata_up']:
                     self.display_data['strata'] += 1
@@ -192,6 +196,7 @@ class TilemapEditor:
                 self.display_data['position'],
                 interface_tile['surface'],
                 self.display_data['orientation'],
+                self.display_data['flipped'],
                 interface_tile['tileset'],
                 interface_tile['index'],
                 interface_tile['tile'],
@@ -252,6 +257,10 @@ class TilemapEditor:
         self.tilemap['config']['strata_alpha'] = self.display_data['strata_alpha']
         self.tilemap['config']['grid_placing'] = self.display_data['grid_placing']
 
+        self.tilemap['config']['strata'] = self.display_data['strata']
+        self.tilemap['config']['orientation'] = self.display_data['orientation']
+        self.tilemap['config']['flipped'] = self.display_data['flipped']
+
         self.tilemap['tiles'] = []
         for tile in self.components['tiles']:
             self.tilemap['tiles'].append(
@@ -259,6 +268,7 @@ class TilemapEditor:
                     'position': [tile['rect'].x, tile['rect'].y],
                     'dimensions': [tile['rect'].width, tile['rect'].height],
                     'orientation': tile['orientation'],
+                    'flipped': tile['flipped'],
 
                     'tileset': tile['tileset'],
                     'index': tile['index'],
@@ -302,7 +312,7 @@ class TilemapEditor:
                     padding[1] + ((padding[1] + self.tilemap['config']['tile']['dimensions'][1]) * y),
                 ]
 
-                prefab = prefabs.tile_interface(position, surface, 0, image, i, tile, 1)
+                prefab = prefabs.tile_interface(position, surface, 0, False, image, i, tile, 1)
 
                 self.display_data['interface_images'][image].append(prefab)
 
@@ -322,6 +332,10 @@ class TilemapEditor:
         self.display_data['strata_alpha'] = self.tilemap['config']['strata_alpha']
         self.display_data['grid_placing'] = self.tilemap['config']['grid_placing']
 
+        self.display_data['strata'] = self.tilemap['config']['strata']
+        self.display_data['orientation'] = self.tilemap['config']['orientation']
+        self.display_data['flipped'] = self.tilemap['config']['flipped']
+
         self.components['tilemap'] = prefabs.tilemap_surface(dimensions)
 
         for t in self.tilemap['tiles']:
@@ -334,6 +348,7 @@ class TilemapEditor:
                     t['position'],
                     self.display_data['interface_images'][t['tileset']][t['index']]['surface'].copy(),
                     t['orientation'],
+                    t['flipped'],
                     t['tileset'],
                     t['index'],
                     tile,
@@ -421,6 +436,7 @@ class TilemapEditor:
         if self.interface_tile:
             surf = self.interface_tile['surface'].copy()
             surf = pygame.transform.rotate(surf, -self.display_data['orientation'])
+            surf = pygame.transform.flip(surf, self.display_data['flipped'], False)
 
             tilemap_surface['surface'].blit(surf, self.display_data['position'])
 
@@ -436,10 +452,12 @@ class TilemapEditor:
 
         strata_surface = utils.create_text(f'strata: {self.display_data["strata"]}')
         orientation_surface = utils.create_text(f'orientation: {self.display_data["orientation"]}')
+        flipped_surface = utils.create_text(f'flipped: {self.display_data["flipped"]}')
 
         screen.blit(position_surface, (325, 750))
-        screen.blit(strata_surface, (325, 715))
-        screen.blit(orientation_surface, (325, 680))
+        screen.blit(orientation_surface, (325, 715))
+        screen.blit(flipped_surface, (325, 680))
+        screen.blit(strata_surface, (325, 645))
 
         if self.interface_tile:
             tileset_tile = self.tilemap['config']['images'][self.interface_tile['tileset']]['tiles']
@@ -448,7 +466,7 @@ class TilemapEditor:
             tileset_tile = tileset_tile.replace('_', ' ')
 
             tile_surface = utils.create_text(f'tile: {tileset_tile}')
-            screen.blit(tile_surface, (325, 645))
+            screen.blit(tile_surface, (325, 610))
 
     def update(self):
         quit = self.register_pygame_events()

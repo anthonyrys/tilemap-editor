@@ -1,11 +1,12 @@
 import pygame
 
-def tile_interface(position, image, orientation, tileset, index, tile, strata):
+def tile_interface(position, image, orientation, flipped, tileset, index, tile, strata):
     name = f'tile_interface--{tileset}_{index}'
     strata = strata
 
     surface = image
     surface = pygame.transform.rotate(surface, -orientation)
+    surface = pygame.transform.flip(surface, flipped, False)
     
     rect = position
 
@@ -16,6 +17,7 @@ def tile_interface(position, image, orientation, tileset, index, tile, strata):
         'rect': pygame.Rect(rect[0], rect[1], *surface.get_size()),
         'dimensions': surface.get_size(),
         'orientation': orientation,
+        'flipped': flipped,
         
         'tileset': tileset,
         'index': index,
@@ -24,12 +26,13 @@ def tile_interface(position, image, orientation, tileset, index, tile, strata):
         'strata': strata,
     }
 
-def tile_tilemap(position, image, orientation, tileset, index, tile, strata):
+def tile_tilemap(position, image, orientation, flipped, tileset, index, tile, strata):
     name = f'tile_tilemap--{tileset}_{index}'
     strata = strata
 
     surface = image
     surface = pygame.transform.rotate(surface, -orientation)
+    surface = pygame.transform.flip(surface, flipped, False)
     
     rect = position
 
@@ -40,6 +43,7 @@ def tile_tilemap(position, image, orientation, tileset, index, tile, strata):
         'rect': pygame.Rect(rect[0], rect[1], *surface.get_size()),
         'dimensions': surface.get_size(),
         'orientation': orientation,
+        'flipped': flipped,
         
         'tileset': tileset,
         'index': index,
