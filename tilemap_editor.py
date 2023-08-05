@@ -37,10 +37,6 @@ class TilemapEditor:
             'strata_alpha': False
         }
 
-        self.components_copy = self.components.copy()
-        self.mouse_copy = self.mouse.copy()
-        self.display_data_copy = self.display_data.copy()
-
         self.interface_tile = None
 
         self.selecting = False
@@ -98,7 +94,11 @@ class TilemapEditor:
 
                 elif event.key in utils.Keybinds.KEYBINDS['select_move_x']:
                     if self.tilemap:
-                        per_pos = self.tilemap['config']['tile']['dimensions'][0]
+                        if self.display_data['grid_placing']:
+                            per_pos = self.tilemap['config']['tile']['dimensions'][0]
+                        else:
+                            per_pos = self.tilemap['config']['tile']['dimensions'][0] // 4
+
                         if event.mod & pygame.KMOD_SHIFT:
                             per_pos = -per_pos
 
@@ -113,7 +113,11 @@ class TilemapEditor:
 
                 elif event.key in utils.Keybinds.KEYBINDS['select_move_y']:
                     if self.tilemap:
-                        per_pos = self.tilemap['config']['tile']['dimensions'][1]
+                        if self.display_data['grid_placing']:
+                            per_pos = self.tilemap['config']['tile']['dimensions'][1]
+                        else:
+                            per_pos = self.tilemap['config']['tile']['dimensions'][1] // 4
+                    
                         if event.mod & pygame.KMOD_SHIFT:
                             per_pos = -per_pos
 
@@ -283,10 +287,35 @@ class TilemapEditor:
     def load_tilemap(self, path):
         if self.tilemap:
             self.save_tilemap()
-            
-        self.components = self.components_copy.copy()
-        self.mouse = self.mouse_copy.copy()
-        self.display_data = self.display_data_copy.copy()
+
+        self.components = {
+            'sidebar': prefabs.sidebar(),
+            'tilemap': None,
+            'tiles': []
+        }
+
+        self.mouse = {
+            'hovers': [],
+
+            'press': False,
+            'press_position': [[0, 0], [0, 0]]
+        }
+
+        self.display_data = {
+            'interface_images': {},
+            'position': [],
+
+            'grid_placing': True,
+
+            'offset': [0, 0],
+            'current_offset': [0, 0],
+
+            'strata': 0,
+            'orientation': 0,
+            'flipped': False,
+
+            'strata_alpha': False
+        }
 
         self.interface_tile = None
 
